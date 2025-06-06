@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>МЕНЮ ДЛЯ МУЖА</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .menu-section {
+            margin-bottom: 30px;
+        }
+        .menu-section h2 {
+            color: #333;
+        }
+        .item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        .order-list {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .top-right {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .button {
+            margin-top: 10px;
+        }
+        /* Новый стиль для выбора времени */
+        .time-selector {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            align-items: center;
+        }
+        .time-option {
+            cursor: pointer;
+            padding: 10px 20px;
+            border: 2px solid #007BFF;
+            border-radius: 8px;
+            background-color: white;
+            color: #007BFF;
+            font-weight: 600;
+            user-select: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .time-option.selected {
+            background-color: #007BFF;
+            color: white;
+        }
+        .time-input {
+            display: none;
+            font-size: 16px;
+            padding: 5px;
+            border: 2px solid #007BFF;
+            border-radius: 6px;
+        }
+        .time-input.active {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<h1>МЕНЮ ДЛЯ МУЖА</h1>
+
+<div class="top-right">
+    <input type="password" id="adminPass" placeholder="Пароль" />
+    <button onclick="login()">Вход</button>
+</div>
+
+<div class="order-list hidden" id="orders">
+    <h3>Предзаказы</h3>
+    <ul id="orderDisplay"></ul>
+</div>
+
+<form id="orderForm">
+    <div class="menu-section">
+        <h2>ЗАВТРАК</h2>
+        <label><input type="checkbox" name="menu" value="блины" /> блины</label><br />
+        <label><input type="checkbox" name="menu" value="оладья" /> оладья</label><br />
+        <label><input type="checkbox" name="menu" value="яичница" /> яичница</label><br />
+        <label><input type="checkbox" name="menu" value="вареные яйца" /> вареные яйца</label><br />
+        <label><input type="checkbox" name="menu" value="тост с авокадо" /> тост с авокадо</label><br />
+        <label><input type="checkbox" name="menu" value="овсяная каша" /> овсяная каша</label><br />
+        <label><input type="checkbox" name="menu" value="греческий йогурт с гранолой" /> греческий йогурт с гранолой</label><br />
+    </div>
+
+    <div class="menu-section">
+        <h2>ОБЕД / УЖИН</h2>
+        <label><input type="checkbox" name="menu" value="борщ" /> борщ</label><br />
+        <label><input type="checkbox" name="menu" value="макароны" /> макароны</label><br />
+        <label><input type="checkbox" name="menu" value="курица жареная" /> курица жареная</label><br />
+        <label><input type="checkbox" name="menu" value="рис" /> рис</label><br />
+        <label><input type="checkbox" name="menu" value="индейка" /> индейка</label><br />
+        <label><input type="checkbox" name="menu" value="рагу" /> рагу</label><br />
+        <label><input type="checkbox" name="menu" value="плов" /> плов</label><br />
+    </div>
+
+    <div class="menu-section">
+        <h2>НАПИТКИ</h2>
+        <label><input type="checkbox" name="menu" value="кофе" /> кофе</label><br />
+        <label><input type="checkbox" name="menu" value="зеленый чай" /> зеленый чай</label><br />
+        <label><input type="checkbox" name="menu" value="черный чай" /> черный чай</label><br />
+        <label><input type="checkbox" name="menu" value="апельсиновый сок" /> апельсиновый сок</label><br />
+        <label><input type="checkbox" name="menu" value="вода" /> вода</label><br />
+        <label><input type="checkbox" name="menu" value="пиво" /> пиво</label><br />
+    </div>
+
+    <div class="time-selector">
+        <div id="asapOption" class="time-option selected">Как можно скорее</div>
+        <div id="customOption" class="time-option">Указать время</div>
+        <input
+            type="time"
+            id="orderTime"
+            class="time-input"
+            min="06:00"
+            max="23:00"
+            step="300"
+            aria-label="Выберите время заказа"
+        />
+    </div>
+
+    <button type="submit" class="button">Сделать предзаказ</button>
+</form>
+
+<script>
+    const orders = [];
+
+    // Элементы выбора времени
+    const asapOption = document.getElementById('asapOption');
+    const customOption = document.getElementById('customOption');
+    const orderTimeInput = document.getElementById('orderTime');
+
+    let timeChoice = 'asap'; // по умолчанию
+
+    asapOption.addEventListener('click', () => {
+        timeChoice = 'asap';
+        asapOption.classList.add('selected');
+        customOption.classList.remove('selected');
+        orderTimeInput.classList.remove('active');
+    });
+
+    customOption.addEventListener('click', () => {
+        timeChoice = 'custom';
+        customOption.classList.add('selected');
+        asapOption.classList.remove('selected');
+        orderTimeInput.classList.add('active');
+        orderTimeInput.focus();
+    });
+
+    document.getElementById('orderForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const selected = Array.from(document.querySelectorAll('input[name="menu"]:checked')).map(i => i.value);
+
+        let time = '';
+        if (timeChoice === 'custom') {
+            time = orderTimeInput.value;
+            if (!time) {
+                alert('Пожалуйста, укажите время!');
+                orderTimeInput.focus();
+                return;
+            }
+        } else {
+            time = 'как можно скорее';
+        }
+
+        if (selected.length === 0) {
+            alert('Пожалуйста, выберите хотя бы одно блюдо!');
+            return;
+        }
+
+        const order = {
+            items: selected,
+            time: time,
+            status: 'Ожидает'
+        };
+        orders.push(order);
+        updateOrders();
+        e.target.reset();
+        // Сброс выбора времени на ASAP
+        timeChoice = 'asap';
+        asapOption.classList.add('selected');
+        customOption.classList.remove('selected');
+        orderTimeInput.classList.remove('active');
+    });
+
+    function updateOrders() {
+        const list = document.getElementById('orderDisplay');
+        const ordersBlock = document.getElementById('orders');
+        list.innerHTML = '';
+
+        if (orders.length === 0) {
+            ordersBlock.classList.add('hidden');
+        } else {
+            ordersBlock.classList.remove('hidden');
+            orders.forEach((order, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `${order.time} - ${order.items.join(', ')} [${order.status}]`;
+                list.appendChild(li);
+            });
+        }
+    }
+
+    function login() {
+        const pass = document.getElementById('adminPass').value;
+        if (pass === 'ялюблюмужа') {
+            const newWin = window.open('', '_blank');
+            newWin.document.write('<h2>Управление заказами</h2>');
+            orders.forEach((order, i) => {
+                newWin.document.write(`<div>
+                    <p><b>Время:</b> ${order.time}<br>
+                    <b>Блюда:</b> ${order.items.join(', ')}<br>
+                    <b>Статус:</b> ${order.status}</p>
+                    <button onclick="window.opener.updateStatus(${i}, 'Готово');window.location.reload()">Отметить как готово</button>
+                    <button onclick="window.opener.deleteOrder(${i});window.location.reload()">Удалить</button>
+                    <hr>
+                </div>`);
+            });
+        } else {
+            alert('Неверный пароль!');
+        }
+    }
+
+    function updateStatus(index, status) {
+        orders[index].status = status;
+        updateOrders();
+    }
+
+    function deleteOrder(index) {
+        orders.splice(index, 1);
+        updateOrders();
+    }
+
+    window.updateStatus = updateStatus;
+    window.deleteOrder = deleteOrder;
+</script>
+</body>
+</html>
